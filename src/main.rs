@@ -1,29 +1,19 @@
-use std::sync::Arc;
+mod error;
+mod mysq;
 
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Json, Router};
-use counter::Counters;
-use serde::{Deserialize, Serialize};
-
-use crate::error::CustomResult;
-use crate::mysq::Boards;
-
-mod counter;
-mod error;
-mod mysq;
+use mysq::{BoardData, Boards, TaskData};
 
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().unwrap();
+    tracing_subscriber::fmt().init();
 
     let db = Boards::new().await;
 
-    // initialize tracing
-    tracing_subscriber::fmt().init();
-
-    // build our application with a route
     let app = Router::new()
         .route("/board", get(read_boards).post(create_board))
         .route(
@@ -35,10 +25,6 @@ async fn main() {
             "/board/:board_id/task/:task_name",
             get(read_task).put(update_task).delete(delete_task),
         )
-        .layer(axum::middleware::from_fn_with_state(
-            Arc::new(Counters::default()),
-            counter::counter_mw,
-        ))
         .with_state(db);
 
     // run our app with hyper, listening globally on port 8080
@@ -102,18 +88,4 @@ async fn delete_task(
     State(db): State<Boards>,
 ) -> impl IntoResponse {
     db.delete_task(board_id, &task_name).await.map(Json)
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BoardData {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    id: Option<String>,
-    name: String,
-    tasks: Vec<TaskData>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TaskData {
-    name: String,
-    description: String,
 }

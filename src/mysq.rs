@@ -1,10 +1,25 @@
-use crate::{BoardData, CustomResult, TaskData};
+use crate::error::CustomResult;
+use serde::{Deserialize, Serialize};
 use sqlx::mysql::MySqlPoolOptions;
 use sqlx::{MySql, Pool};
 
 #[derive(Clone)]
 pub struct Boards {
     pool: Pool<MySql>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BoardData {
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    id: Option<String>,
+    name: String,
+    tasks: Vec<TaskData>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TaskData {
+    name: String,
+    description: String,
 }
 
 impl Boards {
