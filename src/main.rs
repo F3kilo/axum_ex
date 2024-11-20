@@ -27,7 +27,6 @@ async fn main() {
         )
         .with_state(db);
 
-    // run our app with hyper, listening globally on port 8080
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
