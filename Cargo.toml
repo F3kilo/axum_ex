@@ -1,0 +1,24 @@
+[package]
+name = "axum_ex"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Веб фреймворк
+axum = "0.7.4"
+
+# База данных
+sqlx = { version = "0.8.2", features = ["runtime-tokio-native-tls", "mysql", "json"] }
+
+# Логи
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+log = "0.4.14"
+
+# Утилитарные крейты
+serde = { version = "1.0.188", features = ["derive"] }
+thiserror = "2.0.3"
+dotenv = "0.15.0"
+tokio = { version = "1", features = ["full"] }
